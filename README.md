@@ -1,7 +1,3 @@
-Here’s the updated README with **SMIU room location details** included:  
-
----
-
 # 🏫 SMIU Room Location Web App  
 
 🚀 **Live Demo:** [room-location.netlify.app](https://room-location.netlify.app/)  
