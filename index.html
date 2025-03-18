@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/SMIU_Logo-modified.png" type="image/png">
+    <title>Room Location </title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --background-color: #f5f7fa;
+            --text-color: #34495e;
+            --card-background: white;
+            --border-color: #eee;
+        }
+        .dark-theme {
+            --primary-color: #1a2533;
+            --secondary-color: #2980b9;
+            --accent-color: #c0392b;
+            --light-color: #2c3e50;
+            --dark-color: #ecf0f1;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            --background-color: #121212;
+            --text-color: #ecf0f1;
+            --card-background: #2c3e50;
+            --border-color: #3d3d3d;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* Header image styles */
+        .header-image {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+            box-shadow: var(--shadow);
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        /* Theme toggle switch */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 34px;
+            position: relative;
+            width: 60px;
+        }
+        .theme-switch input {
+            display: none;
+        }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 26px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 26px;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--secondary-color);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .theme-label {
+            margin-left: 10px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        /* Search bar styles */
+        .search-container {
+            margin: 0 auto 20px;
+            max-width: 600px;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        .search-button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .search-button:hover {
+            background-color: var(--primary-color);
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .filter-btn {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .buildings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .building-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .building-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .building-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .floor {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .floor:last-child {
+            border-bottom: none;
+        }
+        .floor-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .floor-title::after {
+            content: '+';
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+        .floor.active .floor-title::after {
+            content: '-';
+        }
+        .rooms {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        .floor.active .rooms {
+            display: grid;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .room {
+            background-color: var(--light-color);
+            padding: 5px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        .room:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            cursor: pointer;
+            transform: scale(1.05);
+        }
+        .room.highlight {
+            background-color: var(--accent-color);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .labs {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        .search-results {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+        .search-results h2 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        .search-results-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .search-result-item {
+            background-color: var(--light-color);
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .search-result-item:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: var(--card-background);
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 60%;
+            max-width: 500px;
+            animation: modalFadeIn 0.3s;
+        }
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .room-details h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        .room-details p {
+            margin-bottom: 10px;
+        }
+        .header-wrapper {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .buildings-container {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .theme-toggle {
+                position: static;
+                margin: 15px auto 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .search-results-list {
+                grid-template-columns: 1fr;
+            }
+            .filters {
+                overflow-x: auto;
+                padding-bottom: 10px;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+            }
+            .filter-btn {
+                white-space: nowrap;
+            }
+            .modal-content {
+                width: 80%;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            header p {
+                font-size: 0.9rem;
+            }
+            .rooms {
+                grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            }
+            .room {
+                font-size: 0.8rem;
+                padding: 4px 2px;
+            }
+            .modal-content {
+                width: 90%;
+                padding: 15px;
+            }
+            .header-image {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-wrapper">
+            <img src="https://lh3.googleusercontent.com/p/AF1QipM7Oi8So6xt0GgLMc_nnb5WHthh7dfbDGo2QqMc=s680-w680-h510" alt="Campus View" class="header-image">
+            <header>
+                <h1>Room Location</h1>
+                <p>Find classroom and lab locations across all buildings</p>
+                <div class="theme-toggle">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="theme-label">Theme</span>
+                </div>
+            </header>
+        </div>
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Search for rooms, labs, buildings...">
+            <button class="search-button" id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
+        <!-- Search Results Section -->
+        <div class="search-results" id="search-results">
+            <h2>Search Results</h2>
+            <div class="search-results-list" id="search-results-list">
+                <!-- Search results will be displayed here -->
+                Your search results will appear here
+            </div>
+        </div>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All Buildings</button>
+            <button class="filter-btn" data-filter="Main Building">Main Building</button>
+            <button class="filter-btn" data-filter="Talpur House">Talpur House</button>
+            <button class="filter-btn" data-filter="Auxiliary Building">Auxiliary Building</button>
+            <button class="filter-btn" data-filter="IT Tower">IT Tower</button>
+        </div>
+        <div class="no-results" id="no-results">No matching rooms found.</div>
+        <div class="buildings-container">
+            <!-- Building cards will be generated by JavaScript -->
+        </div>
+    </div>
+    <!-- Modal for room details -->
+    <div id="roomModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Room Details</h2>
+            <div class="room-details">
+                <!-- Room details will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    <script>
+        // Room data
+        const buildings = [
+            {
+                name: "Main Building",
+                floors: [
+                    {
+                        name: "Ground Floor",
+                        rooms: ["CR-A02","CR-A03","CR-A07","CR-A09","CR-A11","CR-A12","CR-A15","CR-A18","Main Lab"]
+                    }
+                ]
+            },
+            {
+                name: "Talpur House",
+                floors: [
+                    {
+                        name: "Ground Floor",
+                        rooms: ["CR-03", "CR-04", "Environment Lab"]
+                    },
+                    {
+                        name: "First Floor",
+                        rooms: ["CR-101", "CR-102", "CR-103", "CR-104", "Comp. Lab-01", "Comp. Lab-02"]
+                    },
+                    {
+                        name: "Second Floor",
+                        rooms: ["CR-201", "CR-202", "CR-203", "CR-204", "Computer Lab"]
+                    }
+                ]
+            },
+            {
+                name: "Auxiliary Building",
+                floors: [
+                    {
+                        name: "Ground Floor",
+                        rooms: ["CR-401","CR-402","CR-403"]
+                    },
+                    {
+                        name: "First Floor",
+                        rooms: ["CR-301","CR-302","CR-303","CR-304","CR-305","CR-306","CR-307","CR-404","CR-405","CR-406"]
+                    }
+                ]
+            },
+            {
+                name: "IT Tower",
+                floors: [
+                    {
+                        name: "Second Floor",
+                        rooms: ["IT Lab-201", "IT Lab-202", "IT Lab-203", "IT Lab-204"]
+                    },
+                    {
+                        name: "Third Floor",
+                        rooms: ["IT-301", "IT-302", "IT-303", "IT-304"]
+                    },
+                    {
+                        name: "Fourth Floor",
+                        rooms: ["IT-401", "IT-402", "IT-403", "IT-404"]
+                    },
+                    {
+                        name: "Fifth Floor",
+                        rooms: ["IT-501", "IT-502", "IT-503", "IT-504"]
+                    }
+                ]
+            }
+        ];
+        // Generate building cards
+        function generateBuildingCards() {
+            const buildingsContainer = document.querySelector('.buildings-container');
+            buildingsContainer.innerHTML = '';
+            buildings.forEach(building => {
+                const buildingCard = document.createElement('div');
+                buildingCard.className = 'building-card';
+                buildingCard.dataset.building = building.name;
+                const buildingHeader = document.createElement('div');
+                buildingHeader.className = 'building-header';
+                buildingHeader.textContent = building.name;
+                buildingCard.appendChild(buildingHeader);
+                building.floors.forEach(floor => {
+                    const floorDiv = document.createElement('div');
+                    floorDiv.className = 'floor';
+                    floorDiv.dataset.floor = floor.name;
+                    const floorTitle = document.createElement('div');
+                    floorTitle.className = 'floor-title';
+                    floorTitle.textContent = floor.name;
+                    floorTitle.addEventListener('click', () => {
+                        floorDiv.classList.toggle('active');
+                    });
+                    const roomsDiv = document.createElement('div');
+                    roomsDiv.className = 'rooms';
+                    floor.rooms.forEach(room => {
+                        const roomDiv = document.createElement('div');
+                        roomDiv.className = 'room';
+                        roomDiv.textContent = room;
+                        roomDiv.dataset.room = room;
+                        if (room.toLowerCase().includes('lab')) {
+                            roomDiv.classList.add('labs');
+                        }
+                        roomDiv.addEventListener('click', () => {
+                            showRoomDetails(room, building.name, floor.name);
+                        });
+                        roomsDiv.appendChild(roomDiv);
+                    });
+                    floorDiv.appendChild(floorTitle);
+                    floorDiv.appendChild(roomsDiv);
+                    buildingCard.appendChild(floorDiv);
+                });
+                buildingsContainer.appendChild(buildingCard);
+            });
+        }
+        // Show room details in modal
+        function showRoomDetails(room, building, floor) {
+            const modal = document.getElementById('roomModal');
+            const roomDetails = document.querySelector('.room-details');
+            let roomType = "Classroom";
+            if (room.toLowerCase().includes('lab')) {
+                roomType = "Laboratory";
+            }
+            roomDetails.innerHTML = `
+                <h3>${room}</h3>
+                <p><strong>Building:</strong> ${building}</p>
+                <p><strong>Floor:</strong> ${floor}</p>
+                <p><strong>Type:</strong> ${roomType}</p>
+            `;
+            modal.style.display = 'block';
+        }
+        // Close modal
+        document.querySelector('.close').addEventListener('click', () => {
+            document.getElementById('roomModal').style.display = 'none';
+        });
+        // Filter buildings
+        function filterBuildings(filter) {
+            const buildingCards = document.querySelectorAll('.building-card');
+            buildingCards.forEach(card => {
+                if (filter === 'all' || card.dataset.building === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        // Search functionality
+        function searchRooms(query) {
+            const searchResultsList = document.getElementById('search-results-list');
+            const searchResultsSection = document.getElementById('search-results');
+            const noResultsDiv = document.getElementById('no-results');
+            searchResultsList.innerHTML = '';
+            if (!query.trim()) {
+                searchResultsSection.style.display = 'none';
+                noResultsDiv.style.display = 'none';
+                resetRoomHighlights();
+                return;
+            }
+            query = query.toLowerCase().trim();
+            let results = [];
+            buildings.forEach(building => {
+                building.floors.forEach(floor => {
+                    floor.rooms.forEach(room => {
+                        if (room.toLowerCase().includes(query) || 
+                            building.name.toLowerCase().includes(query) || 
+                            floor.name.toLowerCase().includes(query)) {
+                            results.push({
+                                room: room,
+                                building: building.name,
+                                floor: floor.name
+                            });
+                        }
+                    });
+                });
+            });
+            if (results.length > 0) {
+                searchResultsSection.style.display = 'block';
+                noResultsDiv.style.display = 'none';
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.innerHTML = `
+                        <strong>${result.room}</strong>
+                        <div>${result.building} - ${result.floor}</div>
+                    `;
+                    resultItem.addEventListener('click', () => {
+                        navigateToRoom(result.room, result.building, result.floor);
+                    });
+                    searchResultsList.appendChild(resultItem);
+                });
+                highlightMatchedRooms(results);
+            } else {
+                searchResultsSection.style.display = 'none';
+                noResultsDiv.style.display = 'block';
+                resetRoomHighlights();
+            }
+        }
+        // Highlight matched rooms
+        function highlightMatchedRooms(results) {
+            resetRoomHighlights();
+            results.forEach(result => {
+                const buildingCard = document.querySelector(`.building-card[data-building="${result.building}"]`);
+                if (buildingCard) {
+                    const floorDiv = buildingCard.querySelector(`.floor[data-floor="${result.floor}"]`);
+                    if (floorDiv) {
+                        floorDiv.classList.add('active');
+                        const roomDiv = floorDiv.querySelector(`.room[data-room="${result.room}"]`);
+                        if (roomDiv) {
+                            roomDiv.classList.add('highlight');
+                        }
+                    }
+                }
+            });
+        }
+        // Reset room highlights
+        function resetRoomHighlights() {
+            document.querySelectorAll('.room.highlight').forEach(room => {
+                room.classList.remove('highlight');
+            });
+        }
+        // Navigate to a specific room
+        function navigateToRoom(room, building, floor) {
+            filterBuildings(building);
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === building) {
+                    btn.classList.add('active');
+                }
+            });
+            resetRoomHighlights();
+            const buildingCard = document.querySelector(`.building-card[data-building="${building}"]`);
+            if (buildingCard) {
+                const floorDiv = buildingCard.querySelector(`.floor[data-floor="${floor}"]`);
+                if (floorDiv) {
+                    floorDiv.classList.add('active');
+                    const roomDiv = floorDiv.querySelector(`.room[data-room="${room}"]`);
+                    if (roomDiv) {
+                        roomDiv.classList.add('highlight');
+                        setTimeout(() => {
+                            roomDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                }
+            }
+            document.getElementById('search-results').style.display = 'none';
+        }
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            generateBuildingCards();
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    filterBuildings(btn.dataset.filter);
+                    resetRoomHighlights();
+                    document.getElementById('search-results').style.display = 'none';
+                    document.getElementById('no-results').style.display = 'none';
+                });
+            });
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            searchButton.addEventListener('click', () => {
+                searchRooms(searchInput.value);
+            });
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchRooms(searchInput.value);
+                }
+            });
+            searchInput.addEventListener('input', (e) => {
+                if (searchInput.value.trim() === '') {
+                    document.getElementById('search-results').style.display = 'none';
+                    document.getElementById('no-results').style.display = 'none';
+                    resetRoomHighlights();
+                }
+            });
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeToggle.checked = true;
+            }
+            themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) {
+                    document.body.classList.add('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            window.addEventListener('click', (e) => {
+                const modal = document.getElementById('roomModal');
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
